@@ -19,7 +19,7 @@ public class MyLinkedList<E> implements MyList<E>{
     size = 0;
   }
   
-  private MyLinkedList(Node root, int size){
+  private MyLinkedList(Node<E> root, int size){
     this.root = root;
     this.size = size;
   }
@@ -72,13 +72,19 @@ public class MyLinkedList<E> implements MyList<E>{
     Node<E> there;
     Node<E> next;
     if(index > 1){
+      if(index == size + 1){
+        Node<E> n = new Node<>(element, null);
+        tail.setLink(n);
+        tail = n;
+      }
       there = getNode(index - 1);
       next = there.next();
-      there.setLink(new Node(element, next));
+      there.setLink(new Node<>(element, next));
     }else{
       next = root;
-      root = new Node(element, next);
+      root = new Node<>(element, next);
     }
+    size++;
     return true;
   }
 
@@ -89,13 +95,14 @@ public class MyLinkedList<E> implements MyList<E>{
    * @return true if the operation succeeds
    */
   @Override public boolean add(E element) {
-    Node<E> node = new Node(element, null);
+    Node<E> node = new Node<>(element, null);
     if(size > 0){
       tail.setLink(node);
     }else{
       root = node;
     }
     tail = node;
+    size++;
     return true;
   }
 
@@ -180,8 +187,12 @@ public class MyLinkedList<E> implements MyList<E>{
       return null;
     }
     Node<E> preDelete = getNode(index - 1);
+    if(index == size){
+      tail = preDelete;
+    }
     E element = (E) preDelete.next().getData();
     preDelete.setLink(preDelete.next().next());
+    size--;
     return element;
   }
 
@@ -192,11 +203,20 @@ public class MyLinkedList<E> implements MyList<E>{
    * @return The element which was removed, or null if it was not removed
    */
   @Override public E remove(E element) {
-    E out = null;
-    for(Node n = root; n.hasNext(); n = n.next()){
+    E out = root.getData();
+    if(out.equals(element)){
+      root = root.next();
+      size--;
+      return out;
+    }
+    for(Node<E> n = root; n.hasNext(); n = n.next()){
       out = (E) n.next().getData();
       if(out.equals(element)){
         n.setLink(n.next().next());
+        size--;
+        if(n.next().equals(tail)){
+          tail = n;
+        }
         break;
       }
     }
@@ -215,6 +235,10 @@ public class MyLinkedList<E> implements MyList<E>{
       checkBounds(index);
     } catch (ListBoundsException ex) {
       return false;
+    }
+    if(index == size){
+      tail.setData(element);
+      return true;
     }
     getNode(index).setData(element);
     return true;
@@ -307,7 +331,7 @@ public class MyLinkedList<E> implements MyList<E>{
   }
 
   /**
-   * Shift the list by a certain amount of elements, a LS of more than the array size clears.
+   * Shift (circular) the list by a certain amount of elements
    *
    * @param positions The number of positions to shift.  Positive means RS, negative means LS
    * @return True
@@ -317,17 +341,27 @@ public class MyLinkedList<E> implements MyList<E>{
       return true;
     }
     if(positions > 0){
-      Node<E> n = root;
-      for(int i = 0; i < positions; i++){
-        n = new Node<>(null, n);
+      if(positions > size){
+        return shift(positions - size);
       }
+      cShift(true, positions);
     }else{
-      if(-positions <= size){
-        root = getNode(-positions + 1);
-      }else{
-        root = null;
+      if(-positions > size){
+        return shift(positions + size);
       }
+      cShift(false, -positions);
     }
     return true;
+  }
+  
+  private void cShift(boolean dir, int positions){
+    tail.setLink(root);
+    if(dir){
+      tail = getNode(size - positions);
+    }else{
+      tail = getNode(positions);
+    }
+    root = tail.next();
+    tail.setLink(null);
   }
 }
