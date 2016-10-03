@@ -1,48 +1,51 @@
 package lab2;
 
 /**
- * Creates a linked list of elements of type E
  *
  * @author Kevin
- * @param <E> The class which this list will be a collection of
  */
-public class MyLinkedList<E> implements MyList<E>{
-  private Node<E> root;
+public class MyCircularLinkedList<E> implements MyList<E>{
   private Node<E> tail;
   private int size;
   
   /**
    * Creates an empty linked list
    */
-  public MyLinkedList(){
-    root = null;
+  public MyCircularLinkedList(){
+    tail = null;
     size = 0;
   }
   
-  private MyLinkedList(Node<E> root, int size){
-    this.root = root;
-    this.size = size;
+  private void setTail(Node<E> tail, Node<E> root){
+    this.tail = tail;
+    tail.setLink(root);
   }
   
   private Node<E> getNode(int checkedIndex){
-    Node<E> node = root;
+    Node<E> node = tail.next();
     for(int i = 1; i < checkedIndex; i++){
       node = node.next();
     }
     return node;
   }
   
-  private MyLinkedList<E> getListAfterNode(Node<E> n, int indexOf){
-    MyLinkedList out = new MyLinkedList<>(n.next(), size - indexOf);
+  private MyCircularLinkedList<E> getListAfterNode(Node<E> n, int indexOf){
+    MyCircularLinkedList out = new MyCircularLinkedList<>();
+    out.setTail(tail, n.next());
+    out.size = size - indexOf;
     return out;
   }
   
   private Node<E> getFirstNodeWithElement(E element){
-    for(Node n = root; n.hasNext(); n = n.next()){
+    Node<E> n = tail.next();
+    boolean contin;
+    do{
       if(n.getData().equals(element)){
         return n;
       }
-    }
+      contin = !n.equals(tail);
+      n = n.next();
+    }while(contin);
     return null;
   }
   
@@ -56,8 +59,8 @@ public class MyLinkedList<E> implements MyList<E>{
    * Adds an element to the list at a certain index.
    * 
    * The element will be added such that its index will now be that which is passed in.
- The n which contains the new element will point to the n which was previously at
- that index, should that index have existed.
+   * The node which contains the new element will point to the node which was previously at
+   * that index, should that index have existed.
    *
    * @param index The index at which to add
    * @param element The element to add
@@ -75,7 +78,7 @@ public class MyLinkedList<E> implements MyList<E>{
     Node<E> next;
     if(index > 1){
       if(index == size + 1){
-        Node<E> n = new Node<>(element, null);
+        Node<E> n = new Node<>(element, tail.next());
         tail.setLink(n);
         tail = n;
       }else{
@@ -84,8 +87,8 @@ public class MyLinkedList<E> implements MyList<E>{
         there.setLink(new Node<>(element, next));
       }
     }else{
-      next = root;
-      root = new Node<>(element, next);
+      next = tail.next();
+      tail.setLink(new Node<>(element, next));
     }
     size++;
     return true;
@@ -98,13 +101,15 @@ public class MyLinkedList<E> implements MyList<E>{
    * @return true if the operation succeeds
    */
   @Override public boolean add(E element) {
-    Node<E> node = new Node<>(element, null);
-    if(size > 0){
-      tail.setLink(node);
+    Node<E> n = new Node<>(element, null);
+    if(size == 0){
+      tail = n;
+      tail.setLink(tail);
     }else{
-      root = node;
+      n.setLink(tail.next());
+      tail.setLink(n);
+      tail = n;
     }
-    tail = node;
     size++;
     return true;
   }
@@ -115,7 +120,6 @@ public class MyLinkedList<E> implements MyList<E>{
    * @return True
    */
   @Override public boolean clear() {
-    root = null;
     tail = null;
     size = 0;
     return true;
@@ -150,21 +154,21 @@ public class MyLinkedList<E> implements MyList<E>{
   }
 
   /**
-   * Gets the index of the first n with a certain element
+   * Gets the index of the first node with a certain element
    *
    * @param element The element to search for
    * @return The index of the first element or -1 if the element is not found
    */
   @Override public int indexOf(E element) {
-    if(root == null){
-      return 0;
+    if(isEmpty()){
+      return -1;
     }
     int i = 1;
     boolean found = false;
     if(tail.getData().equals(element)){
       return size;
     }
-    for(Node<E> n = root; n.hasNext(); n = n.next()){
+    for(Node<E> n = tail.next(); !n.equals(tail); n = n.next()){
       if(n.getData().equals(element)){
         found = true;
         break;
@@ -179,7 +183,7 @@ public class MyLinkedList<E> implements MyList<E>{
    * @return True if the list is empty
    */
   @Override public boolean isEmpty() {
-    return root == null;
+    return tail == null;
   }
 
   /**
@@ -211,21 +215,14 @@ public class MyLinkedList<E> implements MyList<E>{
    * @return The element which was removed, or null if it was not removed
    */
   @Override public E remove(E element) {
-    E out = root.getData();
-    if(out.equals(element)){
-      root = root.next();
-      size--;
-      return out;
-    }
-    for(Node<E> n = root; n.hasNext(); n = n.next()){
-      out = (E) n.next().getData();
-      if(out.equals(element)){
-        n.setLink(n.next().next());
-        size--;
+    E out = null;
+    for(Node<E> n = tail.next(); !n.equals(tail); n = n.next()){
+      if(n.getData().equals(element)){
+        out = n.getData();
         if(n.next().equals(tail)){
           tail = n;
         }
-        break;
+        n.setLink(n.next().next());
       }
     }
     return out;
@@ -262,7 +259,7 @@ public class MyLinkedList<E> implements MyList<E>{
   }
 
   /**
-   * Gets the subset list from one index in the list to another
+   * Gets the subset list from one index in the list to another, inclusive
    *
    * @param fromIndex The lower bounds of the subset
    * @param toIndex The upper bounds of the subset
@@ -278,16 +275,14 @@ public class MyLinkedList<E> implements MyList<E>{
     } catch (ListBoundsException ex) {
       return null;
     }
-    MyLinkedList<E> out = new MyLinkedList<>();
+    MyCircularLinkedList<E> out = new MyCircularLinkedList<>();
     Node<E> n = getNode(fromIndex);
     int outSize = toIndex - fromIndex + 1;
     out.size = outSize;
-    out.tail = tail;
-    out.root = n;
+    out.setTail(tail, n);
     if(toIndex != size){
-      out.tail = out.getNode(outSize);
+      out.setTail(out.getNode(outSize), n);
     }
-    out.tail.setLink(null);
     return out;
   }
 
@@ -302,7 +297,7 @@ public class MyLinkedList<E> implements MyList<E>{
     }
     E[] out = (E[]) new Object[size];
     int i = 0;
-    for(Node<E> n = root; n.hasNext(); n = n.next()){
+    for(Node<E> n = tail.next(); !n.equals(tail); n = n.next()){
       out[i++] = n.getData();
     }
     return out;
@@ -356,24 +351,13 @@ public class MyLinkedList<E> implements MyList<E>{
       if(positions > size){
         return shift(positions - size);
       }
-      cShift(true, positions);
+      tail = getNode(size - positions);
     }else{
       if(-positions > size){
         return shift(positions + size);
       }
-      cShift(false, -positions);
+      tail = getNode(-positions);
     }
     return true;
-  }
-  
-  private void cShift(boolean dir, int positions){
-    tail.setLink(root);
-    if(dir){
-      tail = getNode(size - positions);
-    }else{
-      tail = getNode(positions);
-    }
-    root = tail.next();
-    tail.setLink(null);
   }
 }
