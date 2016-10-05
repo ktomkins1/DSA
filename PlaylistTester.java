@@ -22,12 +22,11 @@ public class PlaylistTester {
     return r.nextInt(size) + 1;
   }
   
-  public static long[] test(Playlist l){
+  public static long test(Playlist l, int testCase){
     try {
-      int op = r.nextInt(4) + 1;
       long time = System.nanoTime();
       int z = l.totalSongs();
-      switch(op){
+      switch(testCase){
         case 1:
           if(!l.addSongAt(newSong(), vp(z))){
             throw new ListException();
@@ -54,11 +53,9 @@ public class PlaylistTester {
           System.out.println("default test case reached.");
           throw new ListException();
       }
-      long[] out = {System.nanoTime() - time, op};
-      return out;
+      return System.nanoTime() - time;
     } catch (ListException ex) {
-      long[] out = {-1, -1};
-      return out;
+      return 0;
     }
   }
 }
