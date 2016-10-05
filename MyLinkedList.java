@@ -1,12 +1,14 @@
 package lab2;
 
+import java.util.Iterator;
+
 /**
  * Creates a linked list of elements of type E
  *
  * @author Kevin
  * @param <E> The class which this list will be a collection of
  */
-public class MyLinkedList<E> implements MyList<E>{
+public class MyLinkedList<E> implements MyList<E>, Iterable{
   private Node<E> root;
   private Node<E> tail;
   private int size;
@@ -34,7 +36,10 @@ public class MyLinkedList<E> implements MyList<E>{
   }
   
   private MyLinkedList<E> getListAfterNode(Node<E> n, int indexOf){
-    MyLinkedList out = new MyLinkedList<>(n.next(), size - indexOf);
+    MyLinkedList<E> out = new MyLinkedList<>();
+    for(; !n.equals(tail); n = n.next()){
+      out.add(n.getData());
+    }
     return out;
   }
   
@@ -180,6 +185,7 @@ public class MyLinkedList<E> implements MyList<E>{
         found = true;
         break;
       }
+      i++;
     }
     return found ? i : -1;
   }
@@ -223,20 +229,20 @@ public class MyLinkedList<E> implements MyList<E>{
    * @throws lab2.ListException
    */
   @Override public E remove(E element) throws ListException{
-    E out = root.getData();
-    if(out.equals(element)){
+    E out = null;
+    if(root.getData().equals(element)){
       root = root.next();
       size--;
       return out;
     }
     for(Node<E> n = root; n.hasNext(); n = n.next()){
-      out = (E) n.next().getData();
-      if(out.equals(element)){
-        n.setLink(n.next().next());
-        size--;
+      if(n.next().getData().equals(element)){
+        out = (E) n.next().getData();
         if(n.next().equals(tail)){
           tail = n;
         }
+        n.setLink(n.next().next());
+        size--;
         break;
       }
     }
@@ -283,7 +289,7 @@ public class MyLinkedList<E> implements MyList<E>{
    * @param toIndex The upper bounds of the subset
    * @return The list form of the subset
    */
-  @Override public MyList subList(int fromIndex, int toIndex) throws ListException{
+  @Override public MyLinkedList<E> subList(int fromIndex, int toIndex) throws ListException{
     try {
       checkBounds(fromIndex);
       checkBounds(toIndex);
@@ -389,7 +395,7 @@ public class MyLinkedList<E> implements MyList<E>{
     tail.setLink(null);
   }
 
-  @Override public boolean append(MyLinkedList ll) {
+  private boolean append1(MyLinkedList ll) {
     if(ll.size() < 1){
       return true;
     }
@@ -398,14 +404,14 @@ public class MyLinkedList<E> implements MyList<E>{
     return true;
   }
 
-  @Override public boolean append(MyArrayList al) {
+  private boolean append2(MyArrayList al) {
     for(E elem : (E[]) al.toArray()){
       add(elem);
     }
     return true;
   }
 
-  @Override public boolean append(MyCircularLinkedList cll) {
+  private boolean append3(MyCircularLinkedList cll) {
     if(cll.size() < 1){
       return true;
     }
@@ -417,13 +423,38 @@ public class MyLinkedList<E> implements MyList<E>{
   
   @Override public boolean append(MyList l){
     if(l instanceof MyLinkedList){
-      return append((MyLinkedList) l);
+      return append1((MyLinkedList) l);
     }else if(l instanceof MyCircularLinkedList){
-      return append((MyCircularLinkedList) l);
+      return append3((MyCircularLinkedList) l);
     }else if(l instanceof MyArrayList){
-      return append((MyArrayList) l);
+      return append2((MyArrayList) l);
     }else{
       return false;
     }
+  }
+
+  @Override public Iterator iterator() {
+    return new Iterator<E> () {
+      private Node<E> oneBack = null;
+      private Node<E> current = root;
+
+      @Override public boolean hasNext() {
+        return current.hasNext();
+      }
+
+      @Override public E next() {
+        oneBack = current;
+        current = current.next();
+        E out = current.getData();
+        return out;
+      }
+
+      @Override public void remove() {
+        if(oneBack == null){
+          throw new NullPointerException();
+        }
+        oneBack.setLink(current.next());
+      }
+    };
   }
 }

@@ -1,4 +1,4 @@
-package dsalab2;
+package lab2;
 
 /**
  *
@@ -42,7 +42,11 @@ public class Song {
     return name;
   }
   // – returns if given Song object equals this Song object, Hint: overwrite the equals method for objects
-  public boolean equals(Song s){
+  @Override public boolean equals(Object o) {
+    if(!(o instanceof Song)){
+      return false;
+    }
+    Song s = (Song)o;
     return s.getArtist().equalsIgnoreCase(artist) && s.getSongName().equalsIgnoreCase(name);
   }
 }

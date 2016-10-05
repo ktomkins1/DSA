@@ -1,10 +1,12 @@
 package lab2;
 
+import java.util.Iterator;
+
 /**
  *
  * @author Kevin
  */
-public class MyCircularLinkedList<E> implements MyList<E>{
+public class MyCircularLinkedList<E> implements MyList<E>, Iterable{
   private Node<E> tail;
   private int size;
   
@@ -31,8 +33,9 @@ public class MyCircularLinkedList<E> implements MyList<E>{
   
   private MyCircularLinkedList<E> getListAfterNode(Node<E> n, int indexOf){
     MyCircularLinkedList out = new MyCircularLinkedList<>();
-    out.setTail(tail, n.next());
-    out.size = size - indexOf;
+    for(; !n.equals(tail); n = n.next()){
+      out.add(n.getData());
+    }
     return out;
   }
   
@@ -179,6 +182,7 @@ public class MyCircularLinkedList<E> implements MyList<E>{
         found = true;
         break;
       }
+      i++;
     }
     return found ? i : -1;
   }
@@ -227,9 +231,15 @@ public class MyCircularLinkedList<E> implements MyList<E>{
    */
   @Override public E remove(E element) throws ListException{
     E out = null;
+    Node<E> root = tail.next();
+    if(root.getData().equals(element)){
+      tail.setLink(root.next());
+      size--;
+      return out;
+    }
     for(Node<E> n = tail.next(); !n.equals(tail); n = n.next()){
-      if(n.getData().equals(element)){
-        out = n.getData();
+      if(n.next().getData().equals(element)){
+        out = (E) n.next().getData();
         if(n.next().equals(tail)){
           tail = n;
         }
@@ -239,6 +249,7 @@ public class MyCircularLinkedList<E> implements MyList<E>{
     if(out == null){
       throw new ListException();
     }
+    size--;
     return out;
   }
 
@@ -290,13 +301,11 @@ public class MyCircularLinkedList<E> implements MyList<E>{
     } catch (ListBoundsException ex) {
       throw new ListException();
     }
-    MyCircularLinkedList<E> out = new MyCircularLinkedList<>();
-    Node<E> n = getNode(fromIndex);
+    Node<E> n = getNode(fromIndex - 1);
+    MyCircularLinkedList<E> out = getListAfterNode(n, fromIndex - 1);
     int outSize = toIndex - fromIndex + 1;
-    out.size = outSize;
-    out.setTail(tail, n);
     if(toIndex != size){
-      out.setTail(out.getNode(outSize), n);
+      out.setTail(out.getNode(outSize), out.tail.next());
     }
     return out;
   }
@@ -375,46 +384,47 @@ public class MyCircularLinkedList<E> implements MyList<E>{
     }
     return true;
   }
-
-  @Override public boolean append(MyLinkedList ll) {
-    if(ll.size() < 1){
-      return true;
-    }
-    Node<E> root = tail.next();
-    tail.setLink(ll.getHead());
-    tail = ll.getTail();
-    tail.setLink(root);
-    return true;
-  }
-
-  @Override public boolean append(MyArrayList al) {
-    for(E elem : (E[]) al.toArray()){
-      add(elem);
-    }
-    return true;
-  }
-
-  @Override public boolean append(MyCircularLinkedList cll) {
-    if(cll.size() < 1){
-      return true;
-    }
-    cll.tail.setLink(tail.next());
-    tail = cll.tail;
-    return true;
-  }
   
-  @Override public boolean append(MyList l){
-    if(l instanceof MyLinkedList){
-      return append((MyLinkedList) l);
+  @Override public boolean append(MyList<E> l){
+    if(l instanceof MyCircularLinkedList){
+      for(Object elem : (MyCircularLinkedList)l){
+        this.add((E) elem);
+      }
+    }else if(l instanceof MyLinkedList){
+      for(Object elem : (MyLinkedList)l){
+        this.add((E) elem);
+      }
+    }else{
+      for(E elem : l.toArray()){
+        this.add(elem);
+      }
+      return true;
     }
-    else if(l instanceof MyCircularLinkedList){
-      return append((MyCircularLinkedList) l);
-    }
-    else if(l instanceof MyArrayList){
-      return append((MyArrayList) l);
-    }
-    else{
-      return false;
-    }
+    return true;
+  }
+
+  @Override public Iterator iterator() {
+    return new Iterator<E> () {
+      private Node<E> oneBack = tail;
+      private Node<E> current = tail.next();
+
+      @Override public boolean hasNext() {
+        return current.hasNext() && !current.next().equals(tail);
+      }
+
+      @Override public E next() {
+        oneBack = current;
+        current = current.next();
+        E out = current.getData();
+        return out;
+      }
+
+      @Override public void remove() {
+        if(oneBack == null){
+          throw new NullPointerException();
+        }
+        oneBack.setLink(current.next());
+      }
+    };
   }
 }
