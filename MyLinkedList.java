@@ -28,9 +28,14 @@ public class MyLinkedList<E> implements MyList<E>, Iterable{
   }
   
   private Node<E> getNode(int checkedIndex){
+    if(size < 1){
+      return null;
+    }
     Node<E> node = root;
     for(int i = 1; i < checkedIndex; i++){
-      node = node.next();
+      if(node.hasNext()){
+        node = node.next();
+      }
     }
     return node;
   }
@@ -44,7 +49,7 @@ public class MyLinkedList<E> implements MyList<E>, Iterable{
   }
   
   private Node<E> getFirstNodeWithElement(E element){
-    for(Node n = root; n.hasNext(); n = n.next()){
+    for(Node n = root; n != null; n = n.next()){
       if(n.getData().equals(element)){
         return n;
       }
@@ -113,6 +118,12 @@ public class MyLinkedList<E> implements MyList<E>, Iterable{
    */
   @Override public boolean add(E element) {
     Node<E> node = new Node<>(element, null);
+    if(tail == null){
+      if(root == null){
+        root = node;
+      }
+      tail = getNode(size);
+    }
     if(size > 0){
       tail.setLink(node);
     }else{
@@ -283,7 +294,7 @@ public class MyLinkedList<E> implements MyList<E>, Iterable{
   }
 
   /**
-   * Gets the subset list from one index in the list to another
+   * Gets the subset list from one index in the list to another, inclusive
    *
    * @param fromIndex The lower bounds of the subset
    * @param toIndex The upper bounds of the subset
@@ -300,15 +311,12 @@ public class MyLinkedList<E> implements MyList<E>, Iterable{
       throw new ListException();
     }
     MyLinkedList<E> out = new MyLinkedList<>();
-    Node<E> n = getNode(fromIndex);
     int outSize = toIndex - fromIndex + 1;
-    out.size = outSize;
-    out.tail = tail;
-    out.root = n;
-    if(toIndex != size){
-      out.tail = out.getNode(outSize);
+    Node<E> n = getNode(fromIndex);
+    for(int i = 0; i < outSize; i++){
+      out.add(n.getData());
+      n = n.next();
     }
-    out.tail.setLink(null);
     return out;
   }
 
@@ -385,6 +393,9 @@ public class MyLinkedList<E> implements MyList<E>, Iterable{
   }
   
   private void cShift(boolean dir, int positions){
+    if(tail == null){
+      tail = getNode(size);
+    }
     tail.setLink(root);
     if(dir){
       tail = getNode(size - positions);
@@ -436,7 +447,7 @@ public class MyLinkedList<E> implements MyList<E>, Iterable{
   @Override public Iterator iterator() {
     return new Iterator<E> () {
       private Node<E> oneBack = null;
-      private Node<E> current = root;
+      private Node<E> current = new Node(null, root);
 
       @Override public boolean hasNext() {
         return current.hasNext();
