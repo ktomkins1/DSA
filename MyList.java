@@ -47,9 +47,6 @@ public interface MyList<T> {
   //Negative position results in a shift from right to left
   public boolean shift(int positions);
   
-  //Appends the List by the appropriate sub list
-  public boolean append(MyLinkedList ll);
-  public boolean append(MyArrayList al);
-  public boolean append(MyCircularLinkedList cll);
-  public boolean append(MyList l);
+  //Appends the List with another list
+  public boolean append(MyList<T> l);
 }
