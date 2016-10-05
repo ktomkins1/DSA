@@ -16,6 +16,7 @@ public class MyLinkedList<E> implements MyList<E>{
    */
   public MyLinkedList(){
     root = null;
+    tail = null;
     size = 0;
   }
   
@@ -50,6 +51,14 @@ public class MyLinkedList<E> implements MyList<E>{
     if(index > size || index < 1){
       throw new ListBoundsException(this, index);
     }
+  }
+  
+  public Node getHead(){
+    return root;
+  }
+  
+  public Node getTail(){
+    return tail;
   }
   
   /**
@@ -138,13 +147,14 @@ public class MyLinkedList<E> implements MyList<E>{
    * Gets the element at a certain index
    * 
    * @param index The element's index
-   * @return The element found there or null if the index is out of bounds
+   * @return The element found there
+   * @throws lab2.ListException Thrown when the index is out of bounds
    */
-  @Override public E get(int index){
+  @Override public E get(int index) throws ListException{
     try {
       checkBounds(index);
     } catch (ListBoundsException ex) {
-      return null;
+      throw new ListException();
     }
     return getNode(index).getData();
   }
@@ -153,11 +163,12 @@ public class MyLinkedList<E> implements MyList<E>{
    * Gets the index of the first n with a certain element
    *
    * @param element The element to search for
-   * @return The index of the first element or -1 if the element is not found
+   * @return The index of the first element
+   * @throws lab2.ListException if the element is not found
    */
-  @Override public int indexOf(E element) {
+  @Override public int indexOf(E element){
     if(root == null){
-      return 0;
+      return -1;
     }
     int i = 1;
     boolean found = false;
@@ -188,11 +199,11 @@ public class MyLinkedList<E> implements MyList<E>{
    * @param index The index to remove at
    * @return The element removed, or null if the index is out of bounds
    */
-  @Override public E remove(int index) {
+  @Override public E remove(int index) throws ListException{
     try {
       checkBounds(index);
     } catch (ListBoundsException ex) {
-      return null;
+      throw new ListException();
     }
     Node<E> preDelete = getNode(index - 1);
     if(index == size){
@@ -209,8 +220,9 @@ public class MyLinkedList<E> implements MyList<E>{
    *
    * @param element The element to be searched for and removed
    * @return The element which was removed, or null if it was not removed
+   * @throws lab2.ListException
    */
-  @Override public E remove(E element) {
+  @Override public E remove(E element) throws ListException{
     E out = root.getData();
     if(out.equals(element)){
       root = root.next();
@@ -227,6 +239,9 @@ public class MyLinkedList<E> implements MyList<E>{
         }
         break;
       }
+    }
+    if(out == null){
+      throw new ListException();
     }
     return out;
   }
@@ -268,7 +283,7 @@ public class MyLinkedList<E> implements MyList<E>{
    * @param toIndex The upper bounds of the subset
    * @return The list form of the subset
    */
-  @Override public MyList subList(int fromIndex, int toIndex) {
+  @Override public MyList subList(int fromIndex, int toIndex) throws ListException{
     try {
       checkBounds(fromIndex);
       checkBounds(toIndex);
@@ -276,7 +291,7 @@ public class MyLinkedList<E> implements MyList<E>{
         throw new ListBoundsException(this, fromIndex);
       }
     } catch (ListBoundsException ex) {
-      return null;
+      throw new ListException();
     }
     MyLinkedList<E> out = new MyLinkedList<>();
     Node<E> n = getNode(fromIndex);
@@ -297,9 +312,6 @@ public class MyLinkedList<E> implements MyList<E>{
    * @return An array of E elements
    */
   @Override public E[] toArray() {
-    if(size < 1){
-      return null;
-    }
     E[] out = (E[]) new Object[size];
     int i = 0;
     for(Node<E> n = root; n.hasNext(); n = n.next()){
@@ -375,5 +387,43 @@ public class MyLinkedList<E> implements MyList<E>{
     }
     root = tail.next();
     tail.setLink(null);
+  }
+
+  @Override public boolean append(MyLinkedList ll) {
+    if(ll.size() < 1){
+      return true;
+    }
+    this.tail.setLink(ll.root);
+    this.tail = ll.tail != null ? ll.tail : tail;
+    return true;
+  }
+
+  @Override public boolean append(MyArrayList al) {
+    for(E elem : (E[]) al.toArray()){
+      add(elem);
+    }
+    return true;
+  }
+
+  @Override public boolean append(MyCircularLinkedList cll) {
+    if(cll.size() < 1){
+      return true;
+    }
+    tail.setLink(cll.getTail().next());
+    tail = cll.getTail();
+    tail.setLink(null);
+    return true;
+  }
+  
+  @Override public boolean append(MyList l){
+    if(l instanceof MyLinkedList){
+      return append((MyLinkedList) l);
+    }else if(l instanceof MyCircularLinkedList){
+      return append((MyCircularLinkedList) l);
+    }else if(l instanceof MyArrayList){
+      return append((MyArrayList) l);
+    }else{
+      return false;
+    }
   }
 }
