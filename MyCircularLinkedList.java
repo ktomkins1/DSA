@@ -25,6 +25,9 @@ public class MyCircularLinkedList<E> implements MyList<E>, Iterable{
   
   private Node<E> getNode(int checkedIndex){
     Node<E> node = tail.next();
+    if(checkedIndex == 0){
+      return tail;
+    }
     for(int i = 1; i < checkedIndex; i++){
       node = node.next();
     }
@@ -291,7 +294,7 @@ public class MyCircularLinkedList<E> implements MyList<E>, Iterable{
    * @return The list form of the subset
    * @throws lab2.ListException if the indices are invalid
    */
-  @Override public MyList subList(int fromIndex, int toIndex) throws ListException {
+  @Override public MyCircularLinkedList subList(int fromIndex, int toIndex) throws ListException {
     try {
       checkBounds(fromIndex);
       checkBounds(toIndex);
@@ -405,23 +408,30 @@ public class MyCircularLinkedList<E> implements MyList<E>, Iterable{
 
   @Override public Iterator iterator() {
     return new Iterator<E> () {
-      private Node<E> oneBack = tail;
-      private Node<E> current = tail.next();
+      private Node<E> oneBack = null;
+      private Node<E> current = tail;
+      private boolean tailGiven = false;
 
       @Override public boolean hasNext() {
-        return current.hasNext() && !current.next().equals(tail);
+        return current.hasNext() && !tailGiven;
       }
 
       @Override public E next() {
         oneBack = current;
         current = current.next();
         E out = current.getData();
+        if(current.equals(tail)){
+          tailGiven = true;
+        }
         return out;
       }
 
       @Override public void remove() {
         if(oneBack == null){
-          throw new NullPointerException();
+          return;
+        }
+        if(current.equals(tail)){
+          tail = oneBack;
         }
         oneBack.setLink(current.next());
       }

@@ -246,7 +246,7 @@ public class MyLinkedList<E> implements MyList<E>, Iterable{
       size--;
       return out;
     }
-    for(Node<E> n = root; n.hasNext(); n = n.next()){
+    for(Node<E> n = root; n != null; n = n.next()){
       if(n.next().getData().equals(element)){
         out = (E) n.next().getData();
         if(n.next().equals(tail)){
@@ -328,7 +328,7 @@ public class MyLinkedList<E> implements MyList<E>, Iterable{
   @Override public E[] toArray() {
     E[] out = (E[]) new Object[size];
     int i = 0;
-    for(Node<E> n = root; n.hasNext(); n = n.next()){
+    for(Node<E> n = root; n != null; n = n.next()){
       out[i++] = n.getData();
     }
     return out;
@@ -462,7 +462,7 @@ public class MyLinkedList<E> implements MyList<E>, Iterable{
 
       @Override public void remove() {
         if(oneBack == null){
-          throw new NullPointerException();
+          return;
         }
         oneBack.setLink(current.next());
       }
