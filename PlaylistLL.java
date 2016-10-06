@@ -9,6 +9,10 @@ public class PlaylistLL extends Playlist{
   private String name;
   private float time;
   
+  /**
+   *
+   * @param name
+   */
   public PlaylistLL(String name){
     this.name = name;
     time = 0.0f;
@@ -113,15 +117,16 @@ public class PlaylistLL extends Playlist{
     return internal.swap(sIndex, position);
   }
   
-  //: moves all the songs a given number of positions in the list. If the value of positions is
-  //positive then the elements are shifted from left to right. If the value of positions is negative
-  //then the elements are shifted from right to left.
+  /** moves all the songs a given number of positions in the list.
+   *  Negative positions shifts left, positive shifts right.  circular shift.
+  **/
   @Override boolean moveAllSongs(int positions){
     return internal.shift(positions);
   }
   
-  //: swaps the positions of two Songs at the given positions. If the value of the positions are 
-  //not in the Playlist, an exception is thrown.
+  /** swaps the positions of two Songs at the given positions. If the value of the positions are 
+   * not in the Playlist, an exception is thrown.
+  **/
   @Override boolean swapSongs(int position1, int position2){
     return internal.swap(position1, position2);
   }

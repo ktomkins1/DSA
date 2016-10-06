@@ -63,10 +63,18 @@ public class MyLinkedList<E> implements MyList<E>, Iterable{
     }
   }
   
+  /**
+   *
+   * @return
+   */
   public Node getHead(){
     return root;
   }
   
+  /**
+   *
+   * @return
+   */
   public Node getTail(){
     return tail;
   }
@@ -180,7 +188,6 @@ public class MyLinkedList<E> implements MyList<E>, Iterable{
    *
    * @param element The element to search for
    * @return The index of the first element
-   * @throws lab2.ListException if the element is not found
    */
   @Override public int indexOf(E element){
     if(root == null){
@@ -215,6 +222,7 @@ public class MyLinkedList<E> implements MyList<E>, Iterable{
    *
    * @param index The index to remove at
    * @return The element removed, or null if the index is out of bounds
+   * @throws lab2.ListException
    */
   @Override public E remove(int index) throws ListException{
     try {
@@ -299,6 +307,7 @@ public class MyLinkedList<E> implements MyList<E>, Iterable{
    * @param fromIndex The lower bounds of the subset
    * @param toIndex The upper bounds of the subset
    * @return The list form of the subset
+   * @throws lab2.ListException
    */
   @Override public MyLinkedList<E> subList(int fromIndex, int toIndex) throws ListException{
     try {
@@ -432,6 +441,11 @@ public class MyLinkedList<E> implements MyList<E>, Iterable{
     return true;
   }
   
+  /**
+   *
+   * @param l
+   * @return
+   */
   @Override public boolean append(MyList l){
     if(l instanceof MyLinkedList){
       return append1((MyLinkedList) l);

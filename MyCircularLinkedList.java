@@ -5,6 +5,7 @@ import java.util.Iterator;
 /**
  *
  * @author Kevin
+ * @param <E>
  */
 public class MyCircularLinkedList<E> implements MyList<E>, Iterable{
   private Node<E> tail;
@@ -61,6 +62,10 @@ public class MyCircularLinkedList<E> implements MyList<E>, Iterable{
     }
   }
   
+  /**
+   *
+   * @return
+   */
   public Node getTail(){
     return tail;
   }
@@ -169,7 +174,6 @@ public class MyCircularLinkedList<E> implements MyList<E>, Iterable{
    *
    * @param element The element to search for
    * @return The index of the first element matching the input
-   * @throws lab2.ListException if the element is not found
    */
   @Override public int indexOf(E element){
     if(isEmpty()){
@@ -388,6 +392,11 @@ public class MyCircularLinkedList<E> implements MyList<E>, Iterable{
     return true;
   }
   
+  /**
+   *
+   * @param l
+   * @return
+   */
   @Override public boolean append(MyList<E> l){
     if(l instanceof MyCircularLinkedList){
       for(Object elem : (MyCircularLinkedList)l){

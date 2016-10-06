@@ -11,6 +11,10 @@ public class PlaylistCLL extends Playlist{
   private String name;
   private float time;
   
+  /**
+   *
+   * @param name
+   */
   public PlaylistCLL(String name){
     this.name = name;
     time = 0.0f;
