@@ -92,13 +92,14 @@ public class Sort <T extends Comparable> {
     int i = 0;
     for(writeIndex = left1; writeIndex <= right2; i++){
       input[writeIndex++] = (T)temp[i];
-      if(writeIndex > right1){
+      if(writeIndex == right1 + 1){
         writeIndex = left2;
       }
     }
   }
   
   public void merge(T[] input, int len, int left, int right){
+    System.out.println("Current Merge: left: " + left + ", right: " + right);
     if(len < 2){
       return;
     }
@@ -109,6 +110,7 @@ public class Sort <T extends Comparable> {
       return;
     }
     if(len == 3){
+      
       merge(input, 2, left, left + 1);
       if(input[right].compareTo(input[left + 1]) < 0){
         if(input[right].compareTo(input[left]) < 0){
@@ -128,6 +130,7 @@ public class Sort <T extends Comparable> {
     }
     int right1 = left + lenLeft - 1;
     int left2 = left + lenLeft;
+    
     merge(input, lenLeft, left, right1);
     merge(input, lenRight, left2, right);
     twoFinger(input, left, right1, left2, right);
@@ -135,10 +138,52 @@ public class Sort <T extends Comparable> {
   }
   
   public void quickI(T[] input, int len){
+    int pivot = 0;
+    int left = 1;
+    int right = len - 1;
+    while(right > left){
+      if(input[left].compareTo(input[pivot]) > 0){
+        
+      }
+    }
     sorts[1]++;
   }
   
   public void quickR(T[] input, int len, int left, int right){
+    if(len < 3){
+      if(input[left].compareTo(input[right]) > 1){
+        swap(input, left, right);
+      }
+      return;
+    }
+    int pivot = left;
+    int i = left + 1;
+    int j = right;
+    boolean cont = true;
+    while(i < j){
+      cont = true;
+      while(cont){
+        if(input[i].compareTo(input[pivot]) < 0){
+          i++;
+        }else{
+          cont = false;
+        }
+      }
+      cont = true;
+      while(cont){
+        if(input[j].compareTo(input[pivot]) > 0){
+          j--;
+        }else{
+          cont = false;
+        }
+      }
+      swap(input, i, j);
+    }
+    if(input[j].compareTo(input[pivot]) < 0){
+      swap(input, j, pivot);
+    }
+    quickR(input, len, left, j);
+    quickR(input, len, i, right);
     sorts[1]++;
   }
   
