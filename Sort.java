@@ -171,15 +171,45 @@ public class Sort <T extends Comparable> {
   }
   
   public void bucket(T[] input, int len, int left, int right){
+    BucketList bl = new BucketList();
     for(T item : input){
-      
+      bl.add(item);
     }
+    bl.sortAll();
+    bl.bucketsToArray(input);
     sorts[4]++;
   }
   
-  public void radix(T[] input, int len, int left, int right){
-    
+  public void radix(Integer[] input, int len){
+    IntegerHolder[] ints = new IntegerHolder[len];
+    int index = 0;
+    for(Integer in : input){
+      ints[index++] = new IntegerHolder(in);
+    }
+    boolean cont = true;
+    while(cont){
+      cont = false;
+      Sort.generalSort(ints, len);
+      for(IntegerHolder in : ints){
+        in.increasePlace();
+        if(in.getDigit() > 0){
+          cont = true;
+        }
+      }
+    }
     sorts[5]++;
+  }
+  
+  public static int getDigit(Integer in, int place){
+    if(place < 1){
+      return Integer.MIN_VALUE;
+    }
+    String num = in.toString();
+    if(place > num.length()){
+      return 0;
+    }
+    char obj = num.charAt(num.length()-place);
+    return Integer.parseInt("" + obj);
   }
   
   public void heap(T[] input, int len){
@@ -194,7 +224,7 @@ public class Sort <T extends Comparable> {
     sorts[6]++;
   }
   
-  public void tree(T[] input, int len, int left, int right){
+  public void tree(T[] input, int len){
     AVLTree<T> sortAVL = new AVLTree<>();
     for(T t : input){
       sortAVL = AVLTree.insert(sortAVL, t);
@@ -207,7 +237,8 @@ public class Sort <T extends Comparable> {
     sorts[7]++;
   }
   
-  public void generalSort(T[] input, int len){
-    bubble(input, len);
+  public static void generalSort(Comparable[] input, int len){
+    Sort genSorter = new Sort<Comparable>();
+    genSorter.bubble(input, len);
   }
 }
