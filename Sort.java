@@ -67,7 +67,7 @@ public class Sort <T extends Comparable> {
   
   private void twoFinger(T[] input, int left1, int right1, int left2, int right2){
     twoFMerges++;
-    int writeIndex = left1;
+    int writeIndex = 0;
     int readIndex1 = left1;
     int readIndex2 = left2;
     int subLen = ((right1 - left1 + 1) + (right2 - left2 + 1));
