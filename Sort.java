@@ -99,7 +99,6 @@ public class Sort <T extends Comparable> {
   }
   
   public void merge(T[] input, int len, int left, int right){
-    System.out.println("Current Merge: left: " + left + ", right: " + right);
     if(len < 2){
       return;
     }
@@ -137,19 +136,65 @@ public class Sort <T extends Comparable> {
     sorts[0]++;
   }
   
+  private class Range{
+    public int pivot;
+    public int left;
+    public int right;
+    
+    public Range(int p, int l, int r){
+      pivot = p;
+      left = l;
+      right = r;
+    }
+    
+    public boolean isValid(){
+      return right - left >= 1;
+    }
+  }
+  
   public void quickI(T[] input, int len){
-    int pivot = 0;
-    int left = 1;
-    int right = len - 1;
-    while(right > left){
-      if(input[left].compareTo(input[pivot]) > 0){
-        
+    if(len < 1){
+      return;
+    }
+    Range r = new Range(0, 1, len - 1);
+    Stack rightS = new Stack();
+    int pivot;
+    while(true){
+      while(r.isValid()){
+        pivot = quickSort(input, r);
+        rightS.push(new Range(pivot + 1, pivot + 2, r.right)); //push the right hand side
+        r.right = pivot - 1; // keep the range from the current left to its new right
+      }
+      //that is not a good range, so it must be sorted.
+      r = (Range) rightS.pop();
+      if(r == null){
+        return;
       }
     }
-    sorts[1]++;
+  }
+  
+  private int quickSort(T[] input, Range r){
+    int i = r.left;
+    int j = r.right;
+    //System.out.println("quicksort on range: " + i + " to " + j);
+    while(j >= i){
+      if(input[i].compareTo(input[r.pivot]) > 0){
+        while(input[j].compareTo(input[r.pivot]) > 0){
+          j--;
+        }
+        if(j > i){
+          swap(input, i, j);
+        }
+      }
+      i++;
+    }
+    swap(input, r.pivot, j);
+    return j;
   }
   
   public void quickR(T[] input, int len, int left, int right){
+    /*
+    System.out.println("Current quick: left: " + left + ", right: " + right);
     if(len < 3){
       if(input[left].compareTo(input[right]) > 1){
         swap(input, left, right);
@@ -159,12 +204,15 @@ public class Sort <T extends Comparable> {
     int pivot = left;
     int i = left + 1;
     int j = right;
-    boolean cont = true;
+    boolean cont;
     while(i < j){
       cont = true;
       while(cont){
         if(input[i].compareTo(input[pivot]) < 0){
           i++;
+          if(i >= right){
+            cont = false;
+          }
         }else{
           cont = false;
         }
@@ -185,6 +233,7 @@ public class Sort <T extends Comparable> {
     quickR(input, len, left, j);
     quickR(input, len, i, right);
     sorts[1]++;
+    */
   }
   
   public void insertion(T[] input, int len){
